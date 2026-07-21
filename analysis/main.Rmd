@@ -181,19 +181,21 @@ sessionInfo()
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 # if you want to outsource logic to other script files, see README for 
 # further information
-# Load all visualizations functions as separate scripts
-knitr::read_chunk(here::here("scripts", "dviz.supp.R"))
-source(here::here("scripts", "dviz.supp.R"))
-knitr::read_chunk(here::here("scripts", "themes.R"))
-source(here::here("scripts", "themes.R"))
-knitr::read_chunk(here::here("scripts", "plot_grid.R"))
-source(here::here("scripts", "plot_grid.R"))
-knitr::read_chunk(here::here("scripts", "align_legend.R"))
-source(here::here("scripts", "align_legend.R"))
-knitr::read_chunk(here::here("scripts", "label_log10.R"))
-source(here::here("scripts", "label_log10.R"))
-knitr::read_chunk(here::here("scripts", "outliers.R"))
-source(here::here("scripts", "outliers.R"))
+# Load all visualizations functions as separate scripts -- add/remove
+# filenames here rather than adding more read_chunk()/source() pairs below
+viz_scripts <- c(
+  "dviz.supp.R",
+  "themes.R",
+  "plot_grid.R",
+  "align_legend.R",
+  "label_log10.R",
+  "outliers.R"
+)
+
+invisible(lapply(viz_scripts, function(f) {
+  knitr::read_chunk(here::here("analysis", "scripts", f))
+  source(here::here("analysis", "scripts", f))
+}))
 ```
 
 # Introduction
