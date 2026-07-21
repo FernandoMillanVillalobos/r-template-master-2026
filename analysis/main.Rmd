@@ -166,7 +166,22 @@ packages <- c(
 if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv")
 }
-renv::restore(prompt = FALSE)
+
+if (file.exists(here::here("renv.lock"))) {
+  # renv doesn't know about here()'s root -- without an explicit project
+  # path it falls back to getwd(), which knitr temporarily points at the
+  # folder containing this .Rmd (analysis/) while chunks run, not the
+  # true project root. pass here::here() explicitly so it checks the
+  # right place regardless of the current working directory
+  renv::restore(project = here::here(), prompt = FALSE)
+} else {
+  message(
+    "No renv.lock found yet -- this looks like a brand-new project.\n",
+    "Open the project via its .Rproj file and run renv::init() once from ",
+    "the console (not from inside a knit), then commit renv.lock, ",
+    "renv/activate.R, renv/settings.json and .Rprofile. Re-knit afterwards."
+  )
+}
 ```
 
 ## Load packages
