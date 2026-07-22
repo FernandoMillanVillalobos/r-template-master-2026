@@ -18,28 +18,18 @@ if [ "$machine" != "Linux" -a "$machine" != "Mac" ]; then
   exit 1
 fi
 
-# find out checkpoint package date from main.Rmd
-package_date_raw="$(grep -E "package_date\s<-\s\"[0-9]{4}\-[0-9]{2}\-[0-9]{2}\"" analysis/main.Rmd -o)"
-# version_raw="$(grep -E "r_version\s<-\s\"[0-9]{1}\.[0-9]{1}\.[0-9]{1}\"" analysis/main.Rmd -o)"
-# extract substring for date
-package_date=${package_date_raw:16}
-
-# find out system variables
-platform="$(R -e "version[[\"platform\"]]" -q)"
-r_version="$(R -e "paste0(version[[\"major\"]], \".\", version[[\"minor\"]])" -q)"
-# remove leading [1]
-platform=$(echo "$platform" | grep -Eio "\[1\]\s(\".+\")" | cut -d " " -f 2)
-r_version=$(echo "$r_version" | grep -Eio "\[1\]\s(\".+\")" | cut -d " " -f 2)
-# build up path
-r_lib_path="~/.checkpoint/$package_date/lib/$platform/$r_version/"
-# remove "
-r_lib_path=${r_lib_path//\"/}
-
-echo "setting $r_lib_path as R_LIBS"
-# set correct checkpoint folder, so main.Rmd is knitted with historical rmarkdown package
-export R_LIBS_USER=${r_lib_path}
-# env variable RSTUDIO has to be unset when running knit.sh in the built-in RStudio terminal
-R -e 'Sys.unsetenv("RSTUDIO"); library(rmarkdown); rmarkdown::render("analysis/main.Rmd", "html_document")' --no-site-file --no-init-file --no-restore --no-save || { echo "ERROR: knitting failed."; exit 1; }
+# package versions are no longer pinned via a checkpoint/MRAN snapshot date,
+# so there's no per-date library path to compute or export here anymore --
+# main.Rmd's "Install packages" chunk calls renv::restore(project = here::here())
+# itself, which restores the exact versions recorded in renv.lock into this
+# project's own private library (renv/library/...).
+#
+# for that private library to actually be used (rather than silently
+# falling back to your global R library), R needs to source this project's
+# .Rprofile at startup -- that's what activates renv and points .libPaths()
+# at the right place. so, unlike the old checkpoint-era version of this
+# script, we deliberately do NOT pass --no-init-file below.
+R -e 'library(rmarkdown); rmarkdown::render("analysis/main.Rmd", "html_document")' --no-site-file --no-restore --no-save || { echo "ERROR: knitting failed."; exit 1; }
 
 # open browser
 # TODO should probably be adapted for Mac OS
