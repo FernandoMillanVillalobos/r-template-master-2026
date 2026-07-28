@@ -1,9 +1,18 @@
-tmp
 .Rproj.user
-.Rproj.user
-.Rproj.user
-.Rproj.user
-.Rproj.user
-.Rproj.user
-.Rproj.user
-.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# _site or _book directory
+/.quarto/
+/_site/
+
+# rendered output (published via `quarto publish gh-pages`)
+/index.html
+/main_files/libs/
+
+# renv
+renv/library/
+renv/python/
+renv/sandbox/
+renv/staging/
